@@ -1,23 +1,32 @@
-const canvas = document.createElement('canvas')
-document.body.appendChild(canvas)
+const container = document.createElement('div')
+container.width = '100vw'
+container.height = '100vh'
+container.position = 'relative'
+document.body.appendChild(container)
 
-let width = window.innerWidth
-let height = window.innerHeight
-
-canvas.width = width
-canvas.height = height
-
-window.addEventListener('resize', () => {
-	width = window.innerWidth
-	height = window.innerHeight
+function createLayer() {
+	const canvas = document.createElement('canvas')
 	canvas.width = width
 	canvas.height = height
-})
+
+	canvas.style.position = 'absolute'
+	canvas.style.top = 0
+	canvas.style.left = 0
+
+	container.appendChild(canvas)
+
+	const context = canvas.getContext('2d')
+	return context
+}
+
+const width = window.innerWidth
+const height = window.innerHeight
+
 /*
 canvas.style.overflow = 'hidden'
 canvas.style.borderRadius = '1rem'*/
 
-const canvasCtx = canvas.getContext('2d')
+const layer1 = createLayer()
 
 let analyser, bufferLength, dataArray, oscillator, audioCtx
 
@@ -91,69 +100,7 @@ function autoCorrelate(buf) {
 
 let buf = new Float32Array(2048)
 
-const amps = [20, 40, 60, 80]
-
-canvasCtx.fillStyle = '#111827'
-canvasCtx.fillRect(0, 0, width, height)
-
-/*
-canvasCtx.font = '24vw Arial'
-canvasCtx.fillStyle = '#1F293748'
-canvasCtx.textAlign = 'right'
-canvasCtx.textBaseline = 'bottom'
-canvasCtx.fillText('Sing4U', width - 20, height - 20)
-*/
-
-amps.map((item) => {
-	canvasCtx.lineWidth = 1
-	canvasCtx.strokeStyle = '#1F2937'
-
-	canvasCtx.beginPath()
-
-	const h = height / 90
-	const y = h * item
-
-	canvasCtx.moveTo(0, y)
-	canvasCtx.lineTo(width, y)
-
-	canvasCtx.stroke()
-
-	canvasCtx.font = '8pt Arial'
-	canvasCtx.fillStyle = '#FFFFFF'
-	canvasCtx.textAlign = 'right'
-	canvasCtx.textBaseline = 'middle'
-	canvasCtx.fillText('-' + item + 'dB', width - 10, y)
-})
-
-const ranges = [32, 65, 130, 260, 520, 1000, 2000, 4000, 8000, 16000]
-
-ranges.map((item, index) => {
-	canvasCtx.lineWidth = 1
-	canvasCtx.strokeStyle = '#1F2937'
-
-	const freq = (bufferLength / 24000) * item
-
-	const w = width / Math.log10(bufferLength)
-	const x = Math.log10(freq) * w
-
-	canvasCtx.beginPath()
-
-	canvasCtx.moveTo(x, 0)
-	canvasCtx.lineTo(x, height)
-
-	canvasCtx.stroke()
-	canvasCtx.font = '8pt Arial'
-	canvasCtx.fillStyle = '#FFFFFF'
-	canvasCtx.textAlign = 'center'
-	canvasCtx.fillText(`C${index + 1}`, x, height - 20)
-
-	const text = item > 999 ? `${item / 1000}kHz` : `${item}Hz`
-
-	canvasCtx.font = '8pt Arial'
-	canvasCtx.fillStyle = '#FFFFFF'
-	canvasCtx.textAlign = 'center'
-	canvasCtx.fillText(text, x, height - 10)
-})
+const layer2 = createLayer()
 
 function noteFromPitch(frequency) {
 	var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2))
@@ -174,7 +121,7 @@ function draw() {
 	analyser.getFloatTimeDomainData(buf)
 	const ac = autoCorrelate(buf)
 
-	canvasCtx.clearRect(0, 0, width, height)
+	layer2.clearRect(0, 0, width, height)
 
 	// const ranges = [
 	// 	40,
@@ -221,26 +168,26 @@ function draw() {
 		const x = Math.log10(freq) * w
 
 		if (noteFromPitch(note) === 'C') {
-			canvasCtx.font = '8pt Arial'
-			canvasCtx.fillStyle = '#FFFFFF'
-			canvasCtx.textAlign = 'center'
-			canvasCtx.fillText(`C${octave}`, x, height - 20)
+			layer2.font = '8pt Arial'
+			layer2.fillStyle = '#FFFFFF'
+			layer2.textAlign = 'center'
+			layer2.fillText(`C${octave}`, x, height - 20)
 
 			const text = note > 999 ? `${note / 1000}kHz` : `${note}Hz`
 
-			canvasCtx.font = '8pt Arial'
-			canvasCtx.fillStyle = '#FFFFFF'
-			canvasCtx.textAlign = 'center'
-			canvasCtx.fillText(text, x, height - 10)
+			layer2.font = '8pt Arial'
+			layer2.fillStyle = '#FFFFFF'
+			layer2.textAlign = 'center'
+			layer2.fillText(text, x, height - 10)
 			octave++
 		}
 
-		canvasCtx.beginPath()
+		layer2.beginPath()
 
-		canvasCtx.moveTo(x, 0)
-		canvasCtx.lineTo(x, height)
+		layer2.moveTo(x, 0)
+		layer2.lineTo(x, height)
 
-		canvasCtx.stroke()
+		layer2.stroke()
 	})
     */
 
@@ -251,118 +198,68 @@ function draw() {
 	const w = width / Math.log10(bufferLength)
 	const x = Math.log10(freq) * w
 
-	canvasCtx.lineWidth = 2
-	canvasCtx.strokeStyle = pitchLineColor
+	/*
+	layer2.lineWidth = 2
+	layer2.strokeStyle = pitchLineColor
 
-	canvasCtx.beginPath()
+	layer2.beginPath()
 
-	canvasCtx.moveTo(x, height - 32)
-	canvasCtx.lineTo(x, height)
+	layer2.moveTo(x, height - 32)
+	layer2.lineTo(x, height)
 
-	canvasCtx.stroke()
+	layer2.stroke()
+*/
+	/*
 
-	canvasCtx.beginPath()
-	canvasCtx.moveTo(x - 8, height - 24)
-	canvasCtx.lineTo(x, height - 32)
-	canvasCtx.lineTo(x + 8, height - 24)
-	canvasCtx.stroke()
+	layer2.beginPath()
+	layer2.moveTo(x - 8, height - 24)
+	layer2.lineTo(x, height - 32)
+	layer2.lineTo(x + 8, height - 24)
+	layer2.stroke()*/
 
 	if (ac != -1) {
-		canvasCtx.font = '48pt Arial'
-		canvasCtx.fillStyle = '#FFFFFF'
-		canvasCtx.textAlign = 'center'
-		canvasCtx.textBaseline = 'middle'
+		layer2.font = '48pt Arial'
+		layer2.fillStyle = '#FFFFFF'
+		layer2.textAlign = 'center'
+		layer2.textBaseline = 'middle'
 		acr = Math.round(ac)
-		canvasCtx.fillText(
+		layer2.fillText(
 			noteStrings[noteFromPitch(ac) % 12],
 			width / 2,
 			height / 4 - 40
 		)
-		canvasCtx.font = '16pt Arial'
-		canvasCtx.fillStyle = '#FFFFFF'
-		canvasCtx.textAlign = 'center'
-		canvasCtx.textBaseline = 'middle'
+		layer2.font = '16pt Arial'
+		layer2.fillStyle = '#FFFFFF'
+		layer2.textAlign = 'center'
+		layer2.textBaseline = 'middle'
 		acr = Math.round(ac)
 		const hy = acr > 999 ? `${acr / 1000}kHz` : `${acr}Hz`
-		canvasCtx.fillText(`${hy}`, width / 2, height / 4)
+		layer2.fillText(`${hy}`, width / 2, height / 4)
 	}
 
-	canvasCtx.lineWidth = 1
-	canvasCtx.strokeStyle = '#60A5FA'
+	layer2.lineWidth = 1
+	layer2.strokeStyle = '#60A5FA'
 
-	canvasCtx.beginPath()
+	layer2.beginPath()
 
-	canvasCtx.moveTo(0, height)
-
-	let max = []
-
-	function getMaxOfArray(arr, count) {
-		const x = [...arr]
-		const z = []
-		for (let i = 0; i < count; i++) {
-			const inx = x.indexOf(Math.max(...x))
-			z.push(inx)
-			x.splice(inx, 1)
-		}
-		return z
-	}
-
-	let maxsIndex = getMaxOfArray(dataArray, 0)
-
-	/*{
-		amp: 0,
-		freq: 0,
-		x: 0,
-		y: 0,
-	}*/
+	layer2.moveTo(0, height)
 
 	dataArray.map((item, index) => {
 		let base = 10
 		let w = width / (Math.log(bufferLength) / Math.log(base))
 		let x = (Math.log(index) / Math.log(base)) * w
 		let y = height - (height / 255) * item
-		if ((24000 / bufferLength) * index > 20) {
-			maxsIndex.map((val) => {
-				if (val === index) {
-					max.push({
-						amp: item,
-						freq: (24000 / bufferLength) * index,
-						x,
-						y,
-					})
-				}
-			})
-		}
-
-		/*
-		if (item > max.amp) {
-			const freq = (24000 / bufferLength) * index
-			max = {
-				amp: item,
-				freq,
-				x,
-				y,
-			}
-		}
-        */
 
 		if (!index) {
-			canvasCtx.moveTo(x, y)
+			layer2.moveTo(x, y)
 		} else {
-			canvasCtx.lineTo(x, y)
+			layer2.lineTo(x, y)
 		}
 	})
 
-	max.map((i, index) => {
-		canvasCtx.font = '8pt Arial'
-		canvasCtx.fillStyle = '#FFFFFF'
-		canvasCtx.textAlign = 'center'
-		canvasCtx.fillText(i.freq, i.x, i.y)
-	})
+	layer2.lineTo(width, height)
 
-	canvasCtx.lineTo(width, height)
-
-	canvasCtx.stroke()
+	layer2.stroke()
 }
 
 navigator.mediaDevices
@@ -395,6 +292,79 @@ navigator.mediaDevices
 		const source = audioCtx.createMediaStreamSource(stream)
 
 		source.connect(analyser)
+
+		const amps = [20, 40, 60, 80]
+
+		layer1.fillStyle = '#111827'
+		layer1.fillRect(0, 0, width, height)
+
+		/*
+layer2.font = '24vw Arial'
+layer2.fillStyle = '#1F293748'
+layer2.textAlign = 'right'
+layer2.textBaseline = 'bottom'
+layer2.fillText('Sing4U', width - 20, height - 20)
+*/
+
+		amps.map((item) => {
+			layer1.lineWidth = 1
+			layer1.strokeStyle = '#1F2937'
+
+			layer1.beginPath()
+
+			const h = height / 90
+			const y = h * item
+
+			layer1.moveTo(0, y)
+			layer1.lineTo(width, y)
+
+			layer1.stroke()
+
+			layer1.font = '8pt Arial'
+			layer1.fillStyle = '#FFFFFF'
+			layer1.textAlign = 'right'
+			layer1.textBaseline = 'middle'
+			layer1.fillText('-' + item + 'dB', width - 10, y)
+		})
+
+		const ranges = [32, 65, 130, 260, 520, 1000, 2000, 4000, 8000, 16000]
+
+		ranges.map((item, index) => {
+			layer1.lineWidth = 1
+			layer1.strokeStyle = '#1F2937'
+
+			/*
+	layer1.beginPath()
+	layer1.moveTo(100, 0)
+	layer1.lineTo(100, height)
+	layer1.stroke()
+	*/
+
+			console.log(bufferLength, item)
+
+			const freq = (bufferLength / 24000) * item
+
+			const w = width / Math.log10(bufferLength)
+			const x = Math.log10(freq) * w
+
+			layer1.beginPath()
+
+			layer1.moveTo(x, 0)
+			layer1.lineTo(x, height)
+
+			layer1.stroke()
+			layer1.font = '8pt Arial'
+			layer1.fillStyle = '#FFFFFF'
+			layer1.textAlign = 'center'
+			layer1.fillText(`C${index + 1}`, x, height - 20)
+
+			const text = item > 999 ? `${item / 1000}kHz` : `${item}Hz`
+
+			layer1.font = '8pt Arial'
+			layer1.fillStyle = '#FFFFFF'
+			layer1.textAlign = 'center'
+			layer1.fillText(text, x, height - 10)
+		})
 
 		draw()
 	})
